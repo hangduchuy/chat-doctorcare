@@ -3,10 +3,11 @@
 import useOtherUser from '@/app/hooks/useOtherUser'
 import { Conversation, User } from '@prisma/client'
 import { format } from 'date-fns'
-import { Fragment, useMemo } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { IoClose, IoTrash } from 'react-icons/io5'
 import Avatar from '@/app/components/Avatar'
+import ConfirmModal from './ConfirmModal'
 
 interface ProfileDrawerProps {
   isOpen: boolean
@@ -18,6 +19,7 @@ interface ProfileDrawerProps {
 
 const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, data }) => {
   const otherUser = useOtherUser(data)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const joinedDate = useMemo(() => {
     return format(new Date(otherUser.createdAt), 'PP')
@@ -37,6 +39,7 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, data }) 
 
   return (
     <>
+      <ConfirmModal isOpen={confirmOpen} onClose={() => setConfirmOpen(false)} />
       <Transition.Root show={isOpen} as={Fragment}>
         <Dialog as='div' className='relative z-50' onClose={onClose}>
           <Transition.Child
@@ -61,7 +64,7 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, data }) 
                   leave='transform transition ease-in-out duration-500'
                   leaveTo='translate-x-full'
                 >
-                  <Dialog.Panel className='pointer-events-none w-screen max-w-md'>
+                  <Dialog.Panel className='pointer-events-auto w-screen max-w-md'>
                     <div className='flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-xl'>
                       <div className='px-4 sm:px-6'>
                         <div className='flex items-start justify-end'>
@@ -69,7 +72,7 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, data }) 
                             <button
                               onClick={onClose}
                               type='button'
-                              className='rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2'
+                              className='cursor-pointer rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2'
                             >
                               <span className='sr-only'>Close panel</span>
                               <IoClose size={24} />
@@ -87,7 +90,7 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({ isOpen, onClose, data }) 
                           <div className='text-sm text-gray-500'>{statusText}</div>
                           <div className='flex gap-10 my-8'>
                             <div
-                              onClick={() => {}}
+                              onClick={() => setConfirmOpen(true)}
                               className='flex flex-col gap-3 items-center cursor-pointer hover:opacity-75'
                             >
                               <div className='w-10 h-10 bg-neutral-100 rounded-full flex items-center justify-center'>
