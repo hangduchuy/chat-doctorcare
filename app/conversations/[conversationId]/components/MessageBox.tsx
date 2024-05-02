@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import { useState } from 'react'
 import ImageModal from './ImageModal'
+import VoiceMessage from './VoiceMessage'
 
 interface MessageBoxProps {
   data: FullMessageType
@@ -33,7 +34,10 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast }) => {
   const message = clsx(
     'text-sm w-fit overflow-hidden',
     isOwn ? 'text-white bg-sky-500' : 'bg-gray-100',
-    data.image ? 'rounded-md p-0' : 'rounded-full py-2 px-3'
+    data.image && 'rounded-md p-0',
+    data.body && 'rounded-full py-2 px-3',
+
+    data.audio && 'rounded-lg'
   )
 
   return (
@@ -48,7 +52,7 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast }) => {
         </div>
         <div className={message}>
           <ImageModal isOpen={imageModalOpen} onClose={() => setImageModalOpen(false)} src={data.image} />
-          {data.image ? (
+          {data.image && (
             <Image
               onClick={() => setImageModalOpen(true)}
               src={data.image}
@@ -57,9 +61,9 @@ const MessageBox: React.FC<MessageBoxProps> = ({ data, isLast }) => {
               width={288}
               className='object-cover cursor-pointer hover:scale-110 transition traslate'
             />
-          ) : (
-            <div className=''>{data.body}</div>
           )}
+          {data.body && <div className=''>{data.body}</div>}
+          {data.audio && <VoiceMessage src={data.audio} />}
         </div>
         {isLast && isOwn && seenList.length > 0 && (
           <div className='text-xs font-light text-gray-500'>{`Seen by ${seenList}`}</div>

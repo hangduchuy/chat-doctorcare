@@ -1,18 +1,23 @@
 'use client'
 
-import { use, useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form'
-
-import Input from '../../components/inputs/Input'
-import Button from '../../components/Button'
-import AuthSocialButton from './AuthSocialButton'
 import { BsGithub, BsGoogle } from 'react-icons/bs'
 import axios from 'axios'
 import toast from 'react-hot-toast'
 import { signIn, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
+import AuthSocialButton from './AuthSocialButton'
+import Input from '../../components/inputs/Input'
+import Button from '../../components/Button'
+
 type Variant = 'LOGIN' | 'REGISTER'
+
+const AuthAssistant = {
+  email: 'assistant@gmail.com',
+  id: '6629c0c820d872765cdcd961'
+}
 
 const AuthForm = () => {
   const session = useSession()
@@ -22,9 +27,24 @@ const AuthForm = () => {
 
   useEffect(() => {
     if (session?.status === 'authenticated') {
-      router.push('/users')
+      if (session?.data?.user?.email === AuthAssistant.email) {
+        router.push('/conversations')
+      } else {
+        axios
+          .post('/api/conversations', {
+            userId: AuthAssistant.id
+          })
+          .then(async (data) => {
+            await router.push(`/conversations/${data.data.id}`)
+            axios.post('/api/messages', {
+              senderId: AuthAssistant.id,
+              conversationId: data.data.id,
+              message: `Chào ${session.data.user?.name} đến hệ thống chat hỗ trợ DoctorCareHA, tôi có thể giúp gì cho bạn?`
+            })
+          })
+      }
     }
-  }, [session?.status, router])
+  }, [router, session])
 
   const toggleVariant = useCallback(() => {
     if (variant === 'LOGIN') {
